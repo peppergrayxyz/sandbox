@@ -9,7 +9,7 @@ lib_LTLIBRARIES += %D%/libsandbox.la
 	-I$(top_srcdir)/libsbutil/include
 
 %C%_libsandbox_la_CFLAGS = $(CFLAG_EXCEPTIONS)
-%C%_libsandbox_la_LIBADD = libsbutil/libsbutil.a $(LIBDL)
+%C%_libsandbox_la_LIBADD = libsbutil/libsbutil.a $(LIBDL) $(LIBDL_EXCEPTIONS)
 # Do not add -nostdlib or -nostartfiles, as then our constructor
 # and destructor will not be executed ...
 %C%_libsandbox_la_LDFLAGS = \

@@ -411,6 +411,35 @@ done
 AC_MSG_RESULT($CFLAG_EXCEPTIONS)
 AC_SUBST([CFLAG_EXCEPTIONS])
 
+dnl Check for exception personality runtime (__gcc_personality_v0)
+ac_save_CFLAGS=$CFLAGS
+CFLAGS="$CFLAGS $CFLAG_EXCEPTIONS"
+AC_LINK_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[extern void __gcc_personality_v0(void);]],
+		[[__gcc_personality_v0();]])],
+	[LIBDL_EXCEPTIONS=""],
+	[AC_CHECK_LIB([gcc_s], [__gcc_personality_v0],
+		[LIBDL_EXCEPTIONS="-lgcc_s"],
+		[AC_CHECK_LIB([gcc], [__gcc_personality_v0],
+			[LIBDL_EXCEPTIONS="-lgcc"],
+			[AC_CHECK_LIB([unwind], [__gcc_personality_v0],
+				[LIBDL_EXCEPTIONS="-lunwind"],
+				[LIBDL_EXCEPTIONS="no"]
+			)]
+		)]
+	)]
+)
+CFLAGS=$ac_save_CFLAGS
+AC_MSG_CHECKING([how to enable exception handling (LIBS)])
+AS_IF([test "x$LIBDL_EXCEPTIONS" = "xno"], [
+	AC_MSG_RESULT([no])
+	AC_MSG_ERROR([Unable to find __gcc_personality_v0 (required for exception handling)])
+], [ 
+	AC_MSG_RESULT([$LIBDL_EXCEPTIONS]) 
+])
+AC_SUBST([LIBDL_EXCEPTIONS])
+
 CPPFLAGS="$CPPFLAGS -D_REENTRANT"
 AX_CFLAGS_WARN_ALL
 AC_DEFUN([SB_CHECK_CFLAG],[AX_CHECK_COMPILE_FLAG([$1],[CFLAGS="$CFLAGS $1"])])
